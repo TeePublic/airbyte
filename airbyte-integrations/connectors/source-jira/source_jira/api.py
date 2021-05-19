@@ -22,10 +22,10 @@
 # SOFTWARE.
 #
 
-from abc import ABC
 import urllib.parse as urlparse
+from abc import ABC
+from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Union
 from urllib.parse import parse_qs
-from typing import Optional, Union, List, Mapping, Any, Iterable, MutableMapping
 
 import requests
 from airbyte_cdk.models import SyncMode
@@ -40,6 +40,7 @@ class JiraStream(HttpStream, ABC):
     """
     Jira API Reference: https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
     """
+
     primary_key = "id"
     parse_response_root = ""
 
@@ -93,8 +94,13 @@ class JiraStream(HttpStream, ABC):
     def _create_prepared_request(
         self, path: str, headers: Mapping = None, params: Mapping = None, json: Any = None
     ) -> requests.PreparedRequest:
-        args = {"method": self.http_method, "url": self.url_base + path, "headers": headers, "params": params,
-                "auth": self.authenticator.get_auth()}
+        args = {
+            "method": self.http_method,
+            "url": self.url_base + path,
+            "headers": headers,
+            "params": params,
+            "auth": self.authenticator.get_auth(),
+        }
 
         if self.http_method.upper() == "POST":
             args["json"] = json
@@ -250,8 +256,7 @@ class IssueProperties(JiraStream):
         issue_property_keys_stream = IssuePropertyKeys(authenticator=self.authenticator, domain=self._domain)
         for issue in issues_stream.read_records(sync_mode=SyncMode.full_refresh):
             for property_key in issue_property_keys_stream.read_records(stream_slice={"key": issue["key"]}, **kwargs):
-                yield from super().read_records(stream_slice={"key": property_key["key"], "issue_key": issue["key"]},
-                                                **kwargs)
+                yield from super().read_records(stream_slice={"key": property_key["key"], "issue_key": issue["key"]}, **kwargs)
 
 
 class IssueRemoteLinks(JiraStream):
@@ -330,3 +335,202 @@ class IssueWorklogs(JiraStream):
             yield from super().read_records(stream_slice={"key": issue["key"]}, **kwargs)
 
 
+class JiraSettings(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "application-properties"
+
+
+class Labels(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "application-properties"
+
+
+class Permissions(JiraStream):
+    parse_response_root = "permissions"
+
+    def path(self, **kwargs) -> str:
+        return "permissions"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        response_json = response.json()
+        records = response_json.get(self.parse_response_root, {}).values()
+        yield from records
+
+
+class PermissionSchemes(JiraStream):
+    parse_response_root = "permissionSchemes"
+
+    def path(self, **kwargs) -> str:
+        return "permissionscheme"
+
+
+class Projects(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, **kwargs) -> str:
+        return "project/search"
+
+
+class ProjectAvatars(JiraStream):
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        key = stream_slice["key"]
+        return f"project/{key}/avatars"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        response_json = response.json()
+        for type_key, records in response_json.items():
+            yield from records
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        projects_stream = Projects(authenticator=self.authenticator, domain=self._domain)
+        for project in projects_stream.read_records(sync_mode=SyncMode.full_refresh):
+            yield from super().read_records(stream_slice={"key": project["key"]}, **kwargs)
+
+
+class ProjectCategories(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "projectCategory"
+
+
+class ProjectComponents(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        key = stream_slice["key"]
+        return f"project/{key}/component"
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        projects_stream = Projects(authenticator=self.authenticator, domain=self._domain)
+        for project in projects_stream.read_records(sync_mode=SyncMode.full_refresh):
+            yield from super().read_records(stream_slice={"key": project["key"]}, **kwargs)
+
+
+class ProjectEmail(JiraStream):
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        project_id = stream_slice["project_id"]
+        return f"project/{project_id}/email"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        response_json = response.json()
+        records = [
+            response_json,
+        ]
+        yield from records
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        projects_stream = Projects(authenticator=self.authenticator, domain=self._domain)
+        for project in projects_stream.read_records(sync_mode=SyncMode.full_refresh):
+            yield from super().read_records(stream_slice={"project_id": project["id"]}, **kwargs)
+
+
+class ProjectPermissionSchemes(JiraStream):
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        key = stream_slice["key"]
+        return f"project/{key}/securitylevel"
+
+    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
+        response_json = response.json()
+        records = [
+            response_json,
+        ]
+        yield from records
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        projects_stream = Projects(authenticator=self.authenticator, domain=self._domain)
+        for project in projects_stream.read_records(sync_mode=SyncMode.full_refresh):
+            yield from super().read_records(stream_slice={"key": project["key"]}, **kwargs)
+
+
+class ProjectTypes(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "project/type"
+
+
+class ProjectVersions(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        key = stream_slice["key"]
+        return f"project/{key}/version"
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        projects_stream = Projects(authenticator=self.authenticator, domain=self._domain)
+        for project in projects_stream.read_records(sync_mode=SyncMode.full_refresh):
+            yield from super().read_records(stream_slice={"key": project["key"]}, **kwargs)
+
+
+class Screens(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, **kwargs) -> str:
+        return "screens"
+
+
+class ScreenTabs(JiraStream):
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        screen_id = stream_slice["screen_id"]
+        return f"screens/{screen_id}/tabs"
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        screens_stream = Screens(authenticator=self.authenticator, domain=self._domain)
+        for screen in screens_stream.read_records(sync_mode=SyncMode.full_refresh):
+            yield from super().read_records(stream_slice={"screen_id": screen["id"]}, **kwargs)
+
+    def read_tab_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        screen_id = stream_slice["screen_id"]
+        yield from super().read_records(stream_slice={"screen_id": screen_id}, **kwargs)
+
+
+class ScreenTabFields(JiraStream):
+    def path(self, stream_slice: Mapping[str, Any] = None, **kwargs) -> str:
+        screen_id = stream_slice["screen_id"]
+        tab_id = stream_slice["tab_id"]
+        return f"screens/{screen_id}/tabs/{tab_id}/fields"
+
+    def read_records(self, stream_slice: Optional[Mapping[str, Any]] = None, **kwargs) -> Iterable[Mapping[str, Any]]:
+        screens_stream = Screens(authenticator=self.authenticator, domain=self._domain)
+        screen_tabs_stream = ScreenTabs(authenticator=self.authenticator, domain=self._domain)
+        for screen in screens_stream.read_records(sync_mode=SyncMode.full_refresh):
+            for tab in screen_tabs_stream.read_tab_records(stream_slice={"screen_id": screen["id"]}, **kwargs):
+                yield from super().read_records(stream_slice={"screen_id": screen["id"], "tab_id": tab["id"]}, **kwargs)
+
+
+class ScreenSchemes(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, **kwargs) -> str:
+        return "screenscheme"
+
+
+class TimeTracking(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "configuration/timetracking/list"
+
+
+class Users(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "users/search"
+
+
+class Workflows(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, **kwargs) -> str:
+        return "workflow/search"
+
+
+class WorkflowSchemes(JiraStream):
+    parse_response_root = "values"
+
+    def path(self, **kwargs) -> str:
+        return "workflowscheme"
+
+
+class WorkflowStatuses(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "status"
+
+
+class WorkflowStatusCategories(JiraStream):
+    def path(self, **kwargs) -> str:
+        return "statuscategory"

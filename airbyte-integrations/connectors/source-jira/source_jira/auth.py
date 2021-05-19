@@ -22,10 +22,10 @@
 # SOFTWARE.
 #
 
-from requests.auth import HTTPBasicAuth
 from typing import Any, Mapping
 
 from airbyte_cdk.sources.streams.http.auth.core import HttpAuthenticator
+from requests.auth import HTTPBasicAuth
 
 
 class JiraBasicAuthAuthenticator(HttpAuthenticator):

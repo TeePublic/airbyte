@@ -54,71 +54,68 @@ ENTITIES_MAP = {
     # "issue_votes": {"url": "/issue/{key}/votes", "extractor": lambda v: v["voters"], "params": {}},
     # "issue_watchers": {"url": "/issue/{key}/watchers", "extractor": lambda v: v["watchers"], "params": {}},
     # "issue_worklogs": {"url": "/issue/{key}/worklog", "extractor": lambda v: v["worklogs"], "params": {}},
-
-    "jira_settings": {"url": "/application-properties", "extractor": lambda v: v, "params": {}},
-    "labels": {
-        "url": "/label",
-        "extractor": lambda v: [
-            {"labels": v["values"]},
-        ],
-        "params": {},
-    },
-    "permissions": {
-        "url": "/permissions",
-        "extractor": lambda v: [
-            v,
-        ],
-        "params": {},
-    },
-    "permission_schemes": {
-        "url": "/permissionscheme",
-        "extractor": lambda v: v["permissionSchemes"],
-        "params": {},
-    },
-
-
-    "projects": {"url": "/project/search", "extractor": lambda v: v["values"], "params": {}},
-    "project_avatars": {
-        "url": "/project/{key}/avatars",
-        "extractor": lambda v: [
-            v,
-        ],
-        "params": {},
-    },
-    "project_categories": {"url": "/projectCategory", "extractor": lambda v: v, "params": {}},
-    "project_components": {"url": "/project/{key}/component", "extractor": lambda v: v["values"], "params": {}},
-    "project_email": {
-        "url": "/project/{id}/email",
-        "extractor": lambda v: [
-            v,
-        ],
-        "params": {},
-    },
-    "project_permission_schemes": {
-        "url": "/project/{key}/issuesecuritylevelscheme",
-        "extractor": lambda v: [
-            v,
-        ],
-        "params": {},
-    },
-    "project_types": {"url": "/project/type", "extractor": lambda v: v, "params": {}},
-    "project_versions": {"url": "/project/{key}/version", "extractor": lambda v: v["values"], "params": {}},
-    "screens": {"url": "/screens", "extractor": lambda v: v["values"], "params": {}},
-    "screen_tabs": {"url": "/screens/{id}/tabs", "extractor": lambda v: v, "params": {}},
-    "screen_tab_fields": {"url": "/screens/{id}/tabs/{tab_id}/fields", "extractor": lambda v: v, "params": {}},
-    "screen_schemes": {"url": "/screenscheme", "extractor": lambda v: v["values"], "params": {}},
-    "time_tracking": {"url": "/configuration/timetracking/list", "extractor": lambda v: v, "params": {}},
-    "users": {"url": "/users/search", "extractor": lambda v: v, "params": {}},
-    "workflows": {"url": "/workflow/search", "extractor": lambda v: v["values"], "params": {}},
-    "workflow_transition_rules": {"url": "/workflow/search", "extractor": lambda v: v["values"], "params": {}},
-    "workflow_schemes": {"url": "/workflowscheme", "extractor": lambda v: v["values"], "params": {}},
-    "workflow_scheme_project_associations": {
-        "url": "/workflowscheme/project",
-        "extractor": lambda v: [
-            v["values"],
-        ],
-        "params": {},
-    },
-    "workflow_statuses": {"url": "/status", "extractor": lambda v: v, "params": {}},
-    "workflow_status_categories": {"url": "/statuscategory", "extractor": lambda v: v, "params": {}},
+    # "jira_settings": {"url": "/application-properties", "extractor": lambda v: v, "params": {}},
+    # "labels": {
+    #     "url": "/label",
+    #     "extractor": lambda v: [
+    #         {"labels": v["values"]},
+    #     ],
+    #     "params": {},
+    # },
+    # "permissions": {
+    #     "url": "/permissions",
+    #     "extractor": lambda v: [
+    #         v,
+    #     ],
+    #     "params": {},
+    # },
+    # "permission_schemes": {
+    #     "url": "/permissionscheme",
+    #     "extractor": lambda v: v["permissionSchemes"],
+    #     "params": {},
+    # },
+    # "projects": {"url": "/project/search", "extractor": lambda v: v["values"], "params": {}},
+    # "project_avatars": {
+    #     "url": "/project/{key}/avatars",
+    #     "extractor": lambda v: [
+    #         v,
+    #     ],
+    #     "params": {},
+    # },
+    # "project_categories": {"url": "/projectCategory", "extractor": lambda v: v, "params": {}},
+    # "project_components": {"url": "/project/{key}/component", "extractor": lambda v: v["values"], "params": {}},
+    # "project_email": {
+    #     "url": "/project/{id}/email",
+    #     "extractor": lambda v: [
+    #         v,
+    #     ],
+    #     "params": {},
+    # },
+    # "project_permission_schemes": {
+    #     "url": "/project/{key}/issuesecuritylevelscheme",
+    #     "extractor": lambda v: [
+    #         v,
+    #     ],
+    #     "params": {},
+    # },
+    # "project_types": {"url": "/project/type", "extractor": lambda v: v, "params": {}},
+    # "project_versions": {"url": "/project/{key}/version", "extractor": lambda v: v["values"], "params": {}},
+    # "screens": {"url": "/screens", "extractor": lambda v: v["values"], "params": {}},
+    # "screen_tabs": {"url": "/screens/{id}/tabs", "extractor": lambda v: v, "params": {}},
+    # "screen_tab_fields": {"url": "/screens/{id}/tabs/{tab_id}/fields", "extractor": lambda v: v, "params": {}},
+    # "screen_schemes": {"url": "/screenscheme", "extractor": lambda v: v["values"], "params": {}},
+    # "time_tracking": {"url": "/configuration/timetracking/list", "extractor": lambda v: v, "params": {}},
+    # "users": {"url": "/users/search", "extractor": lambda v: v, "params": {}},
+    # "workflows": {"url": "/workflow/search", "extractor": lambda v: v["values"], "params": {}},
+    # "workflow_transition_rules": {"url": "/workflow/search", "extractor": lambda v: v["values"], "params": {}},
+    # "workflow_schemes": {"url": "/workflowscheme", "extractor": lambda v: v["values"], "params": {}},
+    # "workflow_scheme_project_associations": {
+    #     "url": "/workflowscheme/project",
+    #     "extractor": lambda v: [
+    #         v["values"],
+    #     ],
+    #     "params": {},
+    # },
+    # "workflow_statuses": {"url": "/status", "extractor": lambda v: v, "params": {}},
+    # "workflow_status_categories": {"url": "/statuscategory", "extractor": lambda v: v, "params": {}},
 }
